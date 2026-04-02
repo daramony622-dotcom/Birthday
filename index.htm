@@ -1,0 +1,683 @@
+﻿<html lang="en">
+  <script
+    src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/content/location/location.js"
+    id="eppiocemhmnlbhjplcgkofciiegomcon"></script>
+  <script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/extend-native-history-api.js"></script>
+  <script src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/libs/requests.js"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Happy Birthday Babe &#127874;</title>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Comic Sans MS", cursive, sans-serif;
+      }
+
+      :root {
+        --safe-top: max(12px, env(safe-area-inset-top));
+        --safe-right: max(12px, env(safe-area-inset-right));
+        --safe-bottom: max(12px, env(safe-area-inset-bottom));
+        --safe-left: max(12px, env(safe-area-inset-left));
+      }
+
+      body {
+        background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        padding: var(--safe-top) var(--safe-right)
+          calc(var(--safe-bottom) + 92px) var(--safe-left);
+      }
+
+      .container {
+        text-align: center;
+        z-index: 10;
+        padding: 2rem;
+        width: min(800px, 100%);
+        max-width: 800px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 20px;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 8px 32px rgba(255, 105, 180, 0.3);
+        transition: all 0.5s ease;
+      }
+
+      .container:hover {
+        box-shadow: 0 8px 32px rgba(255, 105, 180, 0.5);
+      }
+
+      h1 {
+        font-size: 3.5rem;
+        color: #ff1493;
+        text-shadow: 2px 2px 8px rgba(255, 255, 255, 0.8);
+        margin-bottom: 1.5rem;
+        opacity: 0;
+        animation: bounce-in 1.5s forwards 0.5s;
+      }
+      .subtitle {
+        font-size: 1.8rem;
+        color: #8a2be2;
+        margin-bottom: 2rem;
+        text-shadow: 1px 1px 4px rgba(255, 255, 255, 0.6);
+        opacity: 0;
+      }
+
+      .next-button {
+        padding: 1rem 3rem;
+        font-size: 1.5rem;
+        background: linear-gradient(45deg, #ff1493, #8a2be2);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(255, 20, 147, 0.5);
+        transition: all 0.3s ease;
+        opacity: 0;
+        animation: fade-in 1s forwards 3s;
+      }
+
+      .next-button:hover {
+        transform: scale(1.05) translateY(-5px);
+        box-shadow: 0 6px 20px rgba(255, 20, 147, 0.7);
+        background: linear-gradient(45deg, #8a2be2, #ff1493);
+      }
+
+      .audio-controls {
+        position: fixed;
+        right: var(--safe-right);
+        bottom: var(--safe-bottom);
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 10px;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .audio-controls button {
+        width: 40px;
+        height: 40px;
+        border: 1px solid rgba(255, 20, 147, 0.25);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: #ff1493;
+        margin-right: 10px;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 4px 12px rgba(255, 20, 147, 0.25);
+        transition: all 0.3s ease;
+      }
+
+      .audio-controls button:hover {
+        transform: scale(1.08);
+        color: #8a2be2;
+        border-color: rgba(138, 43, 226, 0.35);
+        box-shadow: 0 6px 16px rgba(138, 43, 226, 0.28);
+      }
+
+      .audio-controls input {
+        width: 110px;
+        accent-color: #ff1493;
+      }
+
+      .confetti,
+      .balloon,
+      .heart,
+      .star {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        z-index: 1;
+        opacity: 0.8;
+        pointer-events: none;
+      }
+
+      .balloon {
+        width: 40px;
+        height: 50px;
+      }
+
+      .heart {
+        width: 25px;
+        height: 25px;
+      }
+
+      .star {
+        width: 15px;
+        height: 15px;
+      }
+
+      @keyframes float {
+        0% {
+          transform: translateY(0) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(10deg);
+        }
+        100% {
+          transform: translateY(0) rotate(0deg);
+        }
+      }
+
+      @keyframes sway {
+        0% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(20px);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes sparkle {
+        0%,
+        100% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 1;
+          filter: drop-shadow(0 0 5px white);
+        }
+      }
+
+      @keyframes bounce-in {
+        0% {
+          transform: scale(0);
+          opacity: 0;
+        }
+        60% {
+          transform: scale(1.1);
+          opacity: 1;
+        }
+        80% {
+          transform: scale(0.9);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes fade-in {
+        0% {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes typewriter {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+
+      .typewriter-container {
+        display: inline-block;
+        margin: 0 auto;
+        position: relative;
+        max-width: 100%;
+        overflow: hidden;
+        height: 2.5rem;
+      }
+
+      .typewriter-text {
+        position: relative;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 0;
+        animation: typewriter 3s steps(50) forwards 1.5s;
+      }
+
+      .cursor {
+        position: absolute;
+        right: -5px;
+        width: 3px;
+        height: 100%;
+        background-color: #8a2be2;
+        animation: blink 0.8s infinite;
+      }
+
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 2.5rem;
+        }
+        .subtitle {
+          font-size: 1.3rem;
+        }
+        .container {
+          width: min(92%, 620px);
+          padding: 1.5rem;
+        }
+        .next-button {
+          padding: 0.8rem 2rem;
+          font-size: 1.2rem;
+        }
+        .audio-controls {
+          padding: 9px 11px;
+        }
+      }
+
+      @media (max-width: 560px) {
+        body {
+          justify-content: flex-start;
+          padding-top: calc(var(--safe-top) + 8px);
+          padding-bottom: calc(var(--safe-bottom) + 88px);
+        }
+
+        h1 {
+          font-size: clamp(1.85rem, 10vw, 2.25rem);
+          margin-bottom: 1rem;
+        }
+
+        .subtitle {
+          font-size: 1rem;
+          line-height: 1.4;
+          margin-bottom: 1.2rem;
+        }
+
+        .container {
+          border-radius: 16px;
+          padding: 1rem 0.9rem 1.25rem;
+        }
+
+        .typewriter-container {
+          height: auto;
+          overflow: visible;
+        }
+
+        .typewriter-text {
+          white-space: normal;
+          width: 100%;
+          animation: fade-in 0.8s forwards 0.6s;
+        }
+
+        .cursor {
+          display: none;
+        }
+
+        .next-button {
+          width: min(100%, 280px);
+          font-size: 1.02rem;
+          padding: 0.8rem 1.3rem;
+        }
+
+        .audio-controls {
+          padding: 8px 10px;
+          gap: 8px;
+        }
+
+        .audio-controls button {
+          width: 36px;
+          height: 36px;
+          margin-right: 0;
+        }
+
+        .audio-controls input {
+          width: min(90px, 28vw);
+        }
+      }
+    </style>
+    <script
+      bis_use="true"
+      type="text/javascript"
+      charset="utf-8"
+      data-bis-config='["facebook.com/","twitter.com/","youtube-nocookie.com/embed/","//vk.com/","//www.vk.com/","linkedin.com/","//www.linkedin.com/","//instagram.com/","//www.instagram.com/","//www.google.com/recaptcha/api2/","//hangouts.google.com/webchat/","//www.google.com/calendar/","//www.google.com/maps/embed","spotify.com/","soundcloud.com/","//player.vimeo.com/","//disqus.com/","//tgwidget.com/","//js.driftt.com/","friends2follow.com","/widget","login","//video.bigmir.net/","blogger.com","//smartlock.google.com/","//keep.google.com/","/web.tolstoycomments.com/","moz-extension://","chrome-extension://","/auth/","//analytics.google.com/","adclarity.com","paddle.com/checkout","hcaptcha.com","recaptcha.net","2captcha.com","accounts.google.com","www.google.com/shopping/customerreviews","buy.tinypass.com","gstatic.com","secureir.ebaystatic.com","docs.google.com","contacts.google.com","github.com","mail.google.com","chat.google.com","audio.xpleer.com","keepa.com","static.xx.fbcdn.net","sas.selleramp.com","1plus1.video","console.googletagservices.com","//lnkd.demdex.net/","//radar.cedexis.com/","//li.protechts.net/","challenges.cloudflare.com/","ogs.google.com"]'
+      src="chrome-extension://eppiocemhmnlbhjplcgkofciiegomcon/executors/traffic.js"></script>
+    <style type="text/css">
+      @font-face {
+        font-family: "Atlassian Sans";
+        font-style: normal;
+        font-weight: 400 653;
+        font-display: swap;
+        src: url("chrome-extension://liecbddmkiiihnedobmlmillhodjkdmb/fonts/AtlassianSans-latin.woff2")
+          format("woff2");
+        unicode-range:
+          U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+          U+2212, U+2215, U+FEFF, U+FFFD;
+      }
+    </style>
+  </head>
+  <body
+    bis_register="W3sibWFzdGVyIjp0cnVlLCJleHRlbnNpb25JZCI6ImVwcGlvY2VtaG1ubGJoanBsY2drb2ZjaWllZ29tY29uIiwiYWRibG9ja2VyU3RhdHVzIjp7IkRJU1BMQVkiOiJkaXNhYmxlZCIsIkZBQ0VCT09LIjoiZGlzYWJsZWQiLCJUV0lUVEVSIjoiZGlzYWJsZWQiLCJSRURESVQiOiJkaXNhYmxlZCIsIlBJTlRFUkVTVCI6ImRpc2FibGVkIiwiSU5TVEFHUkFNIjoiZGlzYWJsZWQiLCJMSU5LRURJTiI6ImRpc2FibGVkIiwiQ09ORklHIjoiZGlzYWJsZWQifSwidmVyc2lvbiI6IjIuMC4yMiIsInNjb3JlIjoyMDAyMn1d"
+    __processed_0f899d02-c977-4ac2-8af0-0af2181c0594__="true"
+    data-new-gr-c-s-check-loaded="14.1235.0"
+    data-gr-ext-installed="">
+    <div class="container" bis_skin_checked="1">
+      <h1
+        style="
+          text-shadow:
+            rgb(255, 255, 255) 0px 0px 10px,
+            rgba(255, 255, 255, 0.8) 0px 0px 20px,
+            rgba(255, 20, 147, 0.6) 0px 0px 30px;
+        ">
+        Happy Birthday,<br />My Babe Phen &#128536;<br />&#127881; &#127874;
+      </h1>
+      <div class="typewriter-container" bis_skin_checked="1">
+        <div class="subtitle typewriter-text" bis_skin_checked="1">
+          Hey Bestie! Ready for your special surprise? Click to continue!
+          <span class="cursor"></span>
+        </div>
+      </div>
+      <button
+        class="next-button"
+        id="next-button"
+        target="_blank"
+        onclick="goToNextPage()">
+        Let's Go! &#10024;
+      </button>
+    </div>
+
+    <div class="audio-controls" bis_skin_checked="1">
+      <button id="play-pause" aria-label="Play music">&#9654;</button>
+      <input type="range" id="volume" min="0" max="1" step="0.1" value="0.5" />
+    </div>
+
+    <audio id="birthday-song" loop preload="auto">
+      <source src="Happybirth.mp3" type="audio/mpeg" />
+    </audio>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script>
+      // Play birthday song
+      const audio = document.getElementById("birthday-song");
+      const playPauseBtn = document.getElementById("play-pause");
+      const volumeControl = document.getElementById("volume");
+      const RADIO_CLAIM_KEY = "birthdayRadioClaimV1";
+      const RADIO_CHANNEL_NAME = "birthday-radio-control";
+      const RADIO_INSTANCE_ID = `${Date.now()}_${Math.random()
+        .toString(36)
+        .slice(2)}`;
+      const radioChannel =
+        typeof BroadcastChannel !== "undefined"
+          ? new BroadcastChannel(RADIO_CHANNEL_NAME)
+          : null;
+      let isPlaying = false;
+
+      function updatePlayButtonIcon() {
+        if (audio.paused) {
+          playPauseBtn.innerHTML = "&#9654;";
+          playPauseBtn.setAttribute("aria-label", "Play music");
+        } else {
+          playPauseBtn.innerHTML = "&#10074;&#10074;";
+          playPauseBtn.setAttribute("aria-label", "Pause music");
+        }
+      }
+
+      function claimRadioPlayback() {
+        const payload = { id: RADIO_INSTANCE_ID, at: Date.now() };
+        try {
+          localStorage.setItem(RADIO_CLAIM_KEY, JSON.stringify(payload));
+        } catch {
+          // Ignore storage errors.
+        }
+        if (radioChannel) {
+          radioChannel.postMessage({ type: "claim", id: RADIO_INSTANCE_ID });
+        }
+      }
+
+      function handleExternalClaim(externalId) {
+        if (!externalId || externalId === RADIO_INSTANCE_ID) return;
+        if (!audio.paused) {
+          pauseAudio();
+        }
+      }
+
+      if (radioChannel) {
+        radioChannel.addEventListener("message", (event) => {
+          const data = event.data || {};
+          if (data.type === "claim") {
+            handleExternalClaim(data.id);
+          }
+        });
+      }
+
+      window.addEventListener("storage", (event) => {
+        if (event.key !== RADIO_CLAIM_KEY || !event.newValue) return;
+        try {
+          const parsed = JSON.parse(event.newValue);
+          handleExternalClaim(parsed.id);
+        } catch {
+          // Ignore malformed storage payloads.
+        }
+      });
+
+      async function playAudio() {
+        try {
+          await audio.play();
+          isPlaying = true;
+          claimRadioPlayback();
+          updatePlayButtonIcon();
+        } catch (error) {
+          isPlaying = false;
+          updatePlayButtonIcon();
+          console.log("Audio play failed due to autoplay restrictions:", error);
+        }
+      }
+
+      function pauseAudio() {
+        audio.pause();
+        isPlaying = false;
+        updatePlayButtonIcon();
+      }
+
+      // Set initial volume
+      audio.volume = volumeControl.value;
+
+      // Try autoplay, then rely on first interaction fallback if blocked
+      window.addEventListener("load", () => {
+        setTimeout(() => {
+          playAudio();
+        }, 1000);
+      });
+
+      const unlockAndPlay = () => {
+        if (audio.paused) {
+          playAudio();
+        }
+      };
+      window.addEventListener("click", unlockAndPlay, { once: true });
+      window.addEventListener("touchstart", unlockAndPlay, { once: true });
+      window.addEventListener("keydown", unlockAndPlay, { once: true });
+
+      audio.addEventListener("play", () => {
+        isPlaying = true;
+        updatePlayButtonIcon();
+      });
+      audio.addEventListener("pause", () => {
+        isPlaying = false;
+        updatePlayButtonIcon();
+      });
+
+      // Play/Pause button
+      playPauseBtn.addEventListener("click", async () => {
+        if (audio.paused) {
+          await playAudio();
+        } else {
+          pauseAudio();
+        }
+      });
+
+      // Volume control
+      volumeControl.addEventListener("input", () => {
+        audio.volume = volumeControl.value;
+      });
+
+      updatePlayButtonIcon();
+
+      // Function to go to next page
+      function goToNextPage() {
+        // Add a bounce effect before navigating
+        gsap.to(".next-button", {
+          scale: 1.2,
+          yoyo: true,
+          repeat: 1,
+          duration: 0.3,
+          onComplete: () => {
+            // Change this URL to your next page
+            pauseAudio();
+            window.location.href = "Memory.htm";
+
+            // For demonstration, we'll just show an alert
+          },
+        });
+      }
+
+      // Create confetti, balloons, hearts, and stars
+      function createFloatingElements() {
+        const colors = [
+          "#FF1493",
+          "#8A2BE2",
+          "#FFD700",
+          "#FF4500",
+          "#00BFFF",
+          "#32CD32",
+        ];
+        const elements = ["confetti", "balloon", "heart", "star"];
+        const confettiShapes = [
+          "&#9650;",
+          "&#9632;",
+          "&#9679;",
+          "&#9733;",
+          "&#9829;",
+          "&#9830;",
+          "&#10022;",
+          "&#10023;",
+        ];
+
+        for (let i = 0; i < 100; i++) {
+          setTimeout(() => {
+            const element = document.createElement("div");
+
+            // Randomly pick an element type
+            const elementType =
+              elements[Math.floor(Math.random() * elements.length)];
+            element.className = elementType;
+
+            // Set random position
+            element.style.left = Math.random() * 100 + "vw";
+            element.style.top = -30 + "px";
+
+            // Set random color
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Different styling based on element type
+            if (elementType === "confetti") {
+              const shape =
+                confettiShapes[
+                  Math.floor(Math.random() * confettiShapes.length)
+                ];
+              element.innerHTML = shape;
+              element.innerHTML = "&#10084;&#65039;";
+              element.style.fontSize = Math.random() * 20 + 10 + "px";
+              element.style.transform = `rotate(${Math.random() * 360}deg)`;
+            } else if (elementType === "balloon") {
+              element.innerHTML = "&#127880;";
+              element.style.fontSize = Math.random() * 30 + 20 + "px";
+              element.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+            } else if (elementType === "heart") {
+              element.innerHTML = "&#10084;&#65039;";
+              element.style.fontSize = Math.random() * 20 + 10 + "px";
+              element.style.filter = `hue-rotate(${Math.random() * 360}deg)`;
+            } else if (elementType === "star") {
+              element.innerHTML = "&#10024;";
+              element.style.fontSize = Math.random() * 15 + 10 + "px";
+            }
+
+            // Add to body
+            document.body.appendChild(element);
+
+            // Animate with GSAP
+            gsap.to(element, {
+              y: window.innerHeight + 100,
+              x: "+=" + (Math.random() * 200 - 100),
+              rotation: Math.random() * 360,
+              duration: Math.random() * 10 + 5,
+              ease: "power1.out",
+              onComplete: () => {
+                document.body.removeChild(element);
+              },
+            });
+
+            // Add some sparkle animation
+            if (Math.random() > 0.7) {
+              gsap.to(element, {
+                opacity: 0.5,
+                yoyo: true,
+                repeat: -1,
+                duration: 0.5,
+                ease: "sine.inOut",
+              });
+            }
+          }, i * 200); // Staggered start times
+        }
+      }
+
+      // Start floating elements on load
+      window.addEventListener("load", createFloatingElements);
+
+      // Create new elements periodically
+      setInterval(createFloatingElements, 5000);
+
+      // Add a subtle sparkle effect to the heading
+      gsap.to("h1", {
+        textShadow:
+          "0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(255, 255, 255, 0.8), 0 0 30px rgba(255, 20, 147, 0.6)",
+        repeat: -1,
+        yoyo: true,
+        duration: 2,
+      });
+
+      // Responsive adjustments
+      function handleResize() {
+        // Add responsive adjustments if needed
+      }
+
+      window.addEventListener("resize", handleResize);
+      handleResize();
+
+      window.addEventListener("pagehide", () => {
+        if (radioChannel) {
+          radioChannel.close();
+        }
+      });
+    </script>
+  </body>
+</html>
